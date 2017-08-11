@@ -1,34 +1,34 @@
 #include<Servo.h>
 
 int pos = 0, cpos = 0;                                  //position and current position
-String cmd;                                             //command
-bool cac[2] = {false, false};                           //clock wise, anti-clockwise, or simple write
-Servo myservo;
-bool mode = true;                                       //smooth=true,staggered=fals
+String cmd;                                             //command to be entered
+bool cac[2] = {false, false};                           //cac[0] to toggle relative positioning or absolute; cac[1] to toggle anti-clockwise,clockwise
+Servo myservo;                                          //servo object
+bool mode = true;                                       //toggle smooth=true,staggered=false
 int stepsize, steptime, x, y, ac, c;                    //supportive variables
 
 void setup() {
-  myservo.attach(9);
-  Serial.begin(9600);
-  Serial.println("My Servo interpreter");
-  myservo.write(pos);
+  myservo.attach(9);                                    //servo attached to pin 9
+  Serial.begin(9600);                                   //initiating serial communication
+  Serial.println("My Servo interpreter");               //Startup message
+  myservo.write(pos);                                   //initialing servo position to 0
 
 }
 
-void mov(int pos) {                                          //write function
-  if (cac[0] == false);                                      //no clock or anti-clock wise
-  else {
-    if (cac[1] == false)                                     //anti-clockwise
-      pos = cpos + ac;
-    else
-      pos = cpos - c;                                        //clock-wise
+void mov(int pos) {                                          //write function; to write pos to servo
+  if (cac[0] == false);                                      //if clock and anticlockwise is false, do nothing
+  else {                                                     //else if clock and anticlockwise is on
+    if (cac[1] == false)                                     //if anti-clockwise is on
+      pos = cpos + ac;                                       //calculate relative anticlock pos
+    else.                                                    //If clockwise is on
+      pos = cpos - c;                                        //calculate relarive clockwise pos
   }
-  if (mode == true) {                                        //smooth write
+  if (mode == true) {                                        //toggle smooth write
     myservo.write(pos);
     cpos = pos;
   }
-  else {                                                     //staggered write
-    if (cpos <= pos) {
+  else {                                                     // toggle staggered write
+    if (cpos <= pos) {                                       //with the help of stepsize and steptime
       for (int i = cpos; i <= pos; i += stepsize) {
         myservo.write(i);
         delay(steptime);
@@ -40,12 +40,12 @@ void mov(int pos) {                                          //write function
         delay(steptime);
       }
     }
-    cpos = pos;
+    cpos = pos;                                             //updating current position to pos
   }
 }
 
 void loop() {
-  if (Serial.available()) {
+  if (Serial.available()) {                                 
     cmd = Serial.readStringUntil(';');                       //read the command
     if (cmd.startsWith("servo")) {    
       if (cmd.startsWith("mode", 6)) {                      
